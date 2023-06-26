@@ -1,0 +1,23 @@
+Package: ASTRA
+Title: Allelic Specific Transcriptional Regulation Analysis
+Version: 0.0.0.9000
+Authors@R: 
+    person("Stefania", "Mattevi", , "s.mattevi@unibs.it", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-3141-3145"))
+Description: ASTRA enables allele specific expression and/or chromatin accessibility analysis from sequencing data.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Imports: 
+    biomaRt,
+    data.table,
+    dplyr,
+    forcats,
+    GenomicRanges,
+    ggpattern,
+    ggplot2,
+    IRanges,
+    rlang,
+    scales,
+    tidyr
