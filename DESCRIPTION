@@ -18,6 +18,7 @@ Imports:
     ggpattern,
     ggplot2,
     IRanges,
+    R.utils,
     rlang,
     scales,
     tidyr
