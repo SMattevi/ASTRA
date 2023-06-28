@@ -2,7 +2,7 @@
 % Please edit documentation in R/addASE.R
 \name{addASE}
 \alias{addASE}
-\title{Read ASE info and merge with vcf info. Check for mismatching alleles and prepare dataframe for manual phasing.}
+\title{Read ASE info and merge with vcf info.}
 \usage{
 addASE(
   df_var,
@@ -51,5 +51,5 @@ addASE(
 A dataframe.
 }
 \description{
-Read ASE info and merge with vcf info. Check for mismatching alleles and prepare dataframe for manual phasing.
+Check for mismatching alleles and prepare dataframe for manual phasing.
 }

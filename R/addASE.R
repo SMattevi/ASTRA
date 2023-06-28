@@ -1,4 +1,6 @@
-#' Read ASE info and merge with vcf info. Check for mismatching alleles and prepare dataframe for manual phasing.
+#' Read ASE info and merge with vcf info.
+#'
+#' Check for mismatching alleles and prepare dataframe for manual phasing.
 #'
 #' @param df_var A df obtained from snps_read_and_merge()/conshap()
 #' @param ASE_path A path of the ASE obtained from gex bulk analysis

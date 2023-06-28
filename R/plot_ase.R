@@ -34,7 +34,7 @@ plot_ase<- function(df,genes_to_plot,title){
       guides(pattern = guide_legend(override.aes = list(fill = "white"), order = 2),
              fill = guide_legend(override.aes = list(pattern = "none", order=1)))+
       ggplot2::geom_text(aes(x = 0.85, label = .data$tech),color="white")+
-      ggplot2::geom_point(aes(x=1.2,size=.data$totalCount),color="gray")+
+      ggplot2::geom_point(aes(x=1.2,size=.data$totalCount),color="black")+
       ggplot2::ggtitle(title)+
       ggplot2::scale_fill_discrete(name = "", labels = c("A1_counts", "A2_counts"))+
       ggplot2::geom_vline(xintercept = .85)+ggplot2::geom_vline(xintercept = .15)
