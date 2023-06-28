@@ -1,0 +1,93 @@
+---
+title: "ASTRA"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ASTRA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width=6, fig.height=4
+)
+```
+
+```{r setup}
+library(ASTRA)
+```
+
+### Introduction
+
+ASTRA R package permits the analysis of the transcriptional landscape of a gene. This package is comprised in the ASTRA pipeline that permits the analysis of Allele Specific Expression and Allele Specific Accessibility starting from raw sequencing data.
+
+![ASTRA pipeline](images/ASTRA_pipeline.svg){width="550"}
+
+### Set up all the needed files and IDs.
+
+In fact **ASTRA** will process one chromosome at the time that needs to be specified in the following chunk and moreover the sample ID, to individuate the *.vcf* column informative.
+
+```{r}
+chrom=14
+sample="BJ"
+```
+
+BioMart - Ensembl is used to extract genes information, the function *biomart_df()* set up the biomart dataframe as needed by the following function. Change the mart dataset if needed and the gene expanding window.
+
+```{r}
+BM <- biomart_df()
+BMsel<-BM[BM$chromosome_name==chrom,]
+
+head(BMsel)
+```
+
+To read in phasing results in the SHAPEIT4/vcf.gz format is available the function *read_shapeit()* while to read phasing results in the HapTree-X format (see <https://github.com/0xTCG/haptreex#output>) is available the function *read_haptreex()*. Below an example for both the data types.
+
+```{r}
+df_sh_all<-read_shapeit(
+  variant_calling_out_path = system.file("extdata", "snps_het.vcf.gz", package = "ASTRA"),
+  phased_out_path = system.file("extdata", "shapeit_whatshap.vcf.gz", package = "ASTRA"),
+  sample_name =sample)
+
+df_sh<-df_sh_all[df_sh_all$CHROM%in%chrom,]
+head(df_sh)
+
+df_hp_all<-read_haptreex(
+  variant_calling_out_path = system.file("extdata", "snps_het.vcf.gz", package = "ASTRA"),
+  phased_out_path = system.file("extdata", "haptreex.tsv", package = "ASTRA"),
+  sample_name =sample)
+
+df_hp<-df_hp_all[df_hp_all$CHROM%in%chrom,]
+head(df_hp)
+```
+
+### Consensus phasing and manual refinement based on ASE results
+
+At this point of the analysis we can put together the two phasing results (i.e. SHAPEIT4 and HapTree-X in this example) using a **consensus phasing** approach.
+
+```{r}
+olaps <- conshap(df1=df_sh,df2 = df_hp,BMsel = BMsel,DF1="WShapeit",DF2="HapTreeX")
+```
+
+Next we can add Allele Specific Expression info for the manual refinement. Use gatk ASEReadCounter to compute ASE from bulk/pseudo-bulk RNA-seq. Filters for SNPs on genes having at least *reads* supporting it (default reads=2) and overall depth (*totalCount*) \>= od. Next SNPs will be categorized as biallelic/monoallelic based on the Reference Fraction (RF=reference count/overall reads count) value and filtered accordingly to obtain the final gene annotation.
+
+```{r}
+df_ASE<-addASE(
+  df_var = olaps,ASE_path = system.file("extdata", "rna.table", package = "ASTRA"),
+  BM = BMsel,reads=0,od = 10)
+head(df_ASE)
+
+df_SNPs<-biallmonoall(df_ASE)
+
+df_PHASED<-manualP(df_SNPs)
+```
+
+### Final plotting of single gene Allele Specific Expression profile
+
+```{r}
+df_PHASED$tech<-""
+p<-plot_ase(df=df_PHASED,genes_to_plot=c("MEG3"),"Final phasing result MEG3 gene")
+plot(p)
+```
