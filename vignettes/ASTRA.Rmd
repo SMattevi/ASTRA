@@ -19,11 +19,13 @@ knitr::opts_chunk$set(
 library(ASTRA)
 ```
 
-### Introduction
+# Introduction
 
 ASTRA R package permits the analysis of the transcriptional landscape of a gene. This package is comprised in the ASTRA pipeline that permits the analysis of Allele Specific Expression and Allele Specific Accessibility starting from raw sequencing data.
 
-![ASTRA pipeline](images/ASTRA_pipeline.svg){width="550"}
+![ASTRA pipeline](images/ASTRA_pipeline.svg){width="590"}
+
+# Data Load
 
 ### Set up all the needed files and IDs.
 
@@ -63,6 +65,8 @@ df_hp<-df_hp_all[df_hp_all$CHROM%in%chrom,]
 head(df_hp)
 ```
 
+# Phasing: consensus and refinment
+
 ### Consensus phasing and manual refinement based on ASE results
 
 At this point of the analysis we can put together the two phasing results (i.e. SHAPEIT4 and HapTree-X in this example) using a **consensus phasing** approach.
@@ -83,6 +87,8 @@ df_SNPs<-biallmonoall(df_ASE)
 
 df_PHASED<-manualP(df_SNPs)
 ```
+
+# Plotting
 
 ### Final plotting of single gene Allele Specific Expression profile
 
