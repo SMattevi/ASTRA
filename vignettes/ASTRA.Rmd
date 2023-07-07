@@ -65,7 +65,7 @@ df_hp<-df_hp_all[df_hp_all$CHROM%in%chrom,]
 head(df_hp)
 ```
 
-# Phasing: consensus and refinment
+# Phasing: consensus and refinement
 
 ### Consensus phasing and manual refinement based on ASE results
 
