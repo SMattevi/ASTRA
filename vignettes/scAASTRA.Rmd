@@ -2,28 +2,144 @@
 title: "scASTRA"
 output: html_document
 date: "2023-07-07"
+params: 
+  chromosome: 10 # default value
+  cluster: 1
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+### Upload libraries
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(ASTRA)
 ```
 
-## Including Plots
+### Uploading *Biomart* environment
 
-You can also embed plots, for example:
+Using Biomart to upload gene information for the following SNPs annotation
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+BM<-biomart_df()
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### WhatsHap pre-phasing in bash
+
+``` bash
+out_w<-"path/output/file" # no extension
+ref_fasta<-"/path/to/fastafile.fa"
+vcf<-"path/to/vcffile.vcf"
+bam<-"path/to/bamfile.bam"
+
+whatshap phase -o $out_w.vcf --reference=$ref_fasta $vcf $bam --ignore-read-groups
+bgzip $out_w.vcf
+tabix $out_w.vcf.gz
+```
+
+Separate WhatsHap result in chromosomes
+
+``` bash
+for chr in {1..22} X; do
+  bcftools view $out_w.vcf.gz --regions $chr -O z -o $out_w\_chr$chr.vcf.gz
+  tabix $out_w\_chr$chr.vcf.gz; done
+```
+
+### Shapeit4 in bash
+
+``` bash
+sex= male # or female
+out_shapeit="path/output/file"
+threads=6
+ref_vcf_prefix="dbsnp/ref/file_prefix" # between prefix and suffix expected only chrom num
+ref_vcf_suffix="dbsnp/ref/file_suffix"
+
+for chr in {1..22} X; do
+  if [ $chr == "X" ]
+          then
+              if [ $sex == "male" ]
+              then
+                  shapeit4 --input  $out_w\_chr$chr.vcf.gz --region X:10000-2781479,X:155701382-156030895 --output $out_shapeit\_$chr.vcf --thread $threads --reference $ref_vcf_prefix\chr$ref_vcf_suffix
+              else
+                  shapeit4 --input $out_w\_chr$chr.vcf.gz --region X --output $out_shapeit\_$chr.vcf --thread $threads --reference $ref_vcf_prefix\chr$ref_vcf_suffix
+              fi
+          else 
+              shapeit4 --input $out_w\_chr$chr.vcf.gz --region $chr --output $out_shapeit\_$chr.vcf --thread $threads --reference $ref_vcf_prefix\chr$ref_vcf_suffix
+          fi
+done
+```
+
+### Phasing preparation
+
+1.  add phasing to original vcf. Upload vcf from variant calling (filtered if necessary) and the phasing results obtained from WhatsHap+Shapeit4
+
+```{r}
+results_path="/mnt/projects/cardiomyopathy/sc/results_cDCM/"
+
+chromosome=params$chromosome
+cluster=params$cluster
+
+varcall<-paste0(results_path,"merged_vcf/variantsQC.vcf.gz")
+phased<-paste0(results_path,"phased/chr",chromosome,"_phased.vcf.gz")
+df<-read_shapeit(varcall,phased,sample_name = "SAMPLE1")
+df<-df[df$CHROM==chromosome,]
+```
+
+2.  add Allele Specific Expression (bulk gex) info for manual phasing. Use gatk ASEReadCounter to compute ASE from bulk/pseudo-bulk gex + filter SNPs on genes having at least *reads* supporting it (default reads=2)
+
+```{r}
+BMsel<-BM[BM$chromosome_name==chromosome,]
+ASE<-paste0(results_path,"gex/ASE",chromosome,"/",cluster,".table")
+df_compl<-addASE(df_var = df,ASE_path = ASE,BM = BMsel,reads = 0,od = 7)
+df_tmp<-df_compl
+
+```
+
+3.  selelct biallelic/monoallelic SNPs
+
+```{r}
+df_compl<-biallmonoall(df_compl)
+```
+
+### Manual phasing
+
+Manual phasing performed as described here:
+
+``` bash
+df_start<- dataframe with all SNPs (phased and not)
+
+for GENE j overlapped by df_start SNPs:
+    for each of these SNPs if not already phased:
+        swap Ref and Alt allele
+        if sd for GENE j < original sd for the same GENE
+            keep swap 
+            go to next
+        else 
+            keep original setting 
+            go to next
+
+*sd=sd(df_start$refCount(of SNPs overlapping GENE j) / df_start$totalCount (of SNPs overlapping GENE j) )
+
+Next repeat starting from the bottom of df_start (keep as “PHASED” the resulting SNPs from whatshap + shapeit4)
+```
+
+```{r}
+df_ph<-manualP(df_compl)
+```
+
+Resulting data frame:
+
+```{r}
+head(df_ph)
+```
+
+### Use phasing result for plotting
+
+```{r}
+df_ph$tech<-""
+
+pl<-plot_ase(df=df_ph,genes_to_plot="RBM20","Post manual phasing")
+pl
+```
