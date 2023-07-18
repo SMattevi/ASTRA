@@ -86,6 +86,8 @@ head(df_ASE)
 df_SNPs<-biallmonoall(df_ASE)
 
 df_PHASED<-manualP(df_SNPs)
+df_PHASED$tech<-""
+saveRDS(df_PHASED,"ASTRAresults.rds")
 ```
 
 # Plotting
@@ -93,7 +95,7 @@ df_PHASED<-manualP(df_SNPs)
 ### Final plotting of single gene Allele Specific Expression profile
 
 ```{r}
-df_PHASED$tech<-""
 p<-plot_ase(df=df_PHASED,genes_to_plot=c("MEG3"),"Final phasing result MEG3 gene")
-plot(p)
+if(!is.null(p))
+  {plot(p)}
 ```
