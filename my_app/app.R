@@ -1,9 +1,11 @@
 library(shiny)
 library(ASTRA)
 library(ggplot2)
+library(dipsaus)
+library(shinythemes)
 
 # Define UI for data upload app ----
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("united"),
 
   # App title ----
   titlePanel("Uploading Files"),
@@ -30,7 +32,7 @@ ui <- fluidPage(
       #Input: Select chromosome number
       textInput("title", label = h3("Plot title"), value = "ASTRA result"),
 
-      actionButton("do", "Plot Me"),
+      actionButtonStyled("do", "Plot Me",type="primary"),
 
       # Horizontal line ----
       tags$hr(),
@@ -46,11 +48,10 @@ ui <- fluidPage(
 )
 
 # Define server logic to read selected file ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   data <- reactiveValues()
   observeEvent(input$do, {
     output$plot <- renderPlot({
-
       # input$file1 will be NULL initially. After the user selects
       # and uploads a file, head of that data file by default,
       # or all rows if selected, will be shown.
@@ -62,11 +63,13 @@ server <- function(input, output) {
       isolate(data$p<-plot_ase(df=df_input,genes_to_plot=as.list(strsplit(input$genes, ","))[[1]],input$title))
       if(!is.null(data$p)){
         plot(data$p)
+        updateActionButtonStyled(session,"do",type="success")
       }else{
-        data$p<-ggplot() +
-          annotate("text", x = 4, y = 25, size=8, label = "No SNPs in the selected gene(s)") +
+        p_void<-ggplot() +
+          annotate("text", x = 4, y = 25, size=8, label = "No SNPs in the selected gene(s),\n try a new one") +
           theme_void()
-        plot(data$p)
+        plot(p_void)
+        updateActionButtonStyled(session,"do",type="primary")
       }
       # when reading semicolon separated files,
       # having a comma separator causes `read.csv` to error
