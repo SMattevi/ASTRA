@@ -30,7 +30,12 @@ ui <- fluidPage(
       #Input: Select chromosome number
       textInput("title", label = h3("Plot title"), value = "ASTRA result"),
 
-      actionButton("do", "Click Me")
+      actionButton("do", "Plot Me"),
+
+      # Horizontal line ----
+      tags$hr(),
+
+      downloadButton("downloadData", "Download")
     ),
 
     # Main panel for displaying outputs ----
@@ -42,7 +47,7 @@ ui <- fluidPage(
 
 # Define server logic to read selected file ----
 server <- function(input, output) {
-  df_input<-
+  data <- reactiveValues()
   observeEvent(input$do, {
     output$plot <- renderPlot({
 
@@ -54,20 +59,29 @@ server <- function(input, output) {
 
       df_input<-readRDS(input$rds$datapath)
 
-
-      isolate(p<-plot_ase(df=df_input,genes_to_plot=as.list(strsplit(input$genes, ","))[[1]],input$title))
-      if(!is.null(p)){
-        plot(p)
+      isolate(data$p<-plot_ase(df=df_input,genes_to_plot=as.list(strsplit(input$genes, ","))[[1]],input$title))
+      if(!is.null(data$p)){
+        plot(data$p)
       }else{
-        p<-ggplot() +
+        data$p<-ggplot() +
           annotate("text", x = 4, y = 25, size=8, label = "No SNPs in the selected gene(s)") +
           theme_void()
-        plot(p)
+        plot(data$p)
       }
       # when reading semicolon separated files,
       # having a comma separator causes `read.csv` to error
     })
+
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste("data-", Sys.Date(), ".svg", sep="")
+      },
+      content = function(file) {
+        ggsave(file, data$p, width=10, height=8)
+      }
+    )
   })
+
 
 }
 
