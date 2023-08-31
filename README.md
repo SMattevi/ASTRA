@@ -1,2 +1,3 @@
 # ASTRA
-This is a test.
+R package for the Allelic Specific Transcriptional Regulation Analysis.
+
