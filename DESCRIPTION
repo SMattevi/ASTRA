@@ -13,15 +13,19 @@ Imports:
     biomaRt,
     data.table,
     dplyr,
+    EnsDb.Hsapiens.v86,
+    fmsb,
     forcats,
     GenomicRanges,
     ggpattern,
     ggplot2,
     IRanges,
     R.utils,
+    reshape2,
     rlang,
     scales,
-    tidyr
+    tidyr,
+    tximport
 Depends: 
     R (>= 2.10)
 LazyData: true
