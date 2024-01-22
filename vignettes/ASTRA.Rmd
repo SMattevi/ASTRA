@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(ASTRA)
+library(EnsDb.Hsapiens.v86)
 ```
 
 # Introduction
@@ -98,4 +99,28 @@ saveRDS(df_PHASED,"ASTRAresults.rds")
 p<-plot_ase(df=df_PHASED,genes_to_plot=c("MEG3"),"Final phasing result MEG3 gene")
 if(!is.null(p))
   {plot(p)}
+```
+
+```{r}
+df_ann<-merge(df_PHASED,BMsel[,c("ensembl_gene_id","gene_biotype")],by=c("ensembl_gene_id"))
+df_ann<-unique(df_ann[,c("ensembl_gene_id","type","gene_biotype")])
+plot_annotation(df=df_ann,ASC="type",gene="ensembl_gene_id",annotation="gene_biotype")
+# if(!is.null(p))
+#   {plot(p)}
+# 
+# x <- scan("/home/smattevi/c5.all.v2023.1.Hs.symbols.gmt.txt", what="", sep="\n")
+# # Separate elements by one or more whitepace
+# y <- strsplit(x, "[[:space:]]+")
+# # Extract the first vector element and set it as the list element name
+# names(y) <- sapply(y, `[[`, 1)
+# #names(y) <- sapply(y, function(x) x[[1]]) # same as above
+# # Remove the first vector element from each list element
+# y <- lapply(y, `[`, -1)
+# #y <- lapply(y, function(x) x[-1]) # same as above
+```
+
+# Load Salmon counts
+
+```{r}
+expr<-read_salmon(salmon_path=system.file("extdata", "quant.sf", package = "ASTRA"),txdb=EnsDb.Hsapiens.v86,counts=0)
 ```
