@@ -8,7 +8,7 @@ Description: ASTRA enables allele specific expression and/or chromatin accessibi
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.0
 Imports: 
     biomaRt,
     data.table,
@@ -20,6 +20,7 @@ Imports:
     ggpattern,
     ggplot2,
     IRanges,
+    msigdbr,
     R.utils,
     reshape2,
     rlang,
@@ -27,7 +28,8 @@ Imports:
     tidyr,
     tximport
 Depends: 
-    R (>= 2.10)
+    R (>= 2.10),
+    tidyverse
 LazyData: true
 Suggests: 
     knitr,

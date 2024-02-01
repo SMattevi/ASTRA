@@ -84,34 +84,33 @@ plot_annotation<- function(df,ASC,gene,annotation){
 
   # Add a legend
   legend(x=0.7, y=1, legend = rownames(data[-c(1,2),]), bty = "n", pch=20 , col=colors_in , text.col = "grey", cex=1.2, pt.cex=3)
-  # # Set a number of 'empty bar'
-  # empty_bar <- 3
-  #
-  # # Add lines to the initial dataset
-  # to_add <- matrix(NA, empty_bar, ncol(data))
-  # colnames(to_add) <- colnames(data)
-  # data <- rbind(data, to_add)
-  # data$id <- seq(1, nrow(data))
-  #
-  # # Get the name and the y position of each label
-  # label_data <- data
-  # number_of_bar <- nrow(label_data)
-  # angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
-  # label_data$hjust <- ifelse( angle < -90, 1, 0)
-  # label_data$angle <- ifelse(angle < -90, angle+180, angle)
-  #
-  # # Make the plot
-  # p <- ggplot(data, aes(x=as.factor(id), y=gene)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
-  #   geom_bar(stat="identity", aes(fill=ASC)) +
-  #   ylim(-100,max(data$gene[!is.na(data$gene)])+20) +
-  #   theme_minimal() +
-  #   theme(
-  #     axis.text = element_blank(),
-  #     axis.title = element_blank(),
-  #     panel.grid = element_blank(),
-  #     plot.margin = unit(rep(-1,4), "cm")
-  #   ) +
-  #   coord_polar(start = 0) +
-  #   geom_text(data=label_data, aes(x=id, y=gene+10, label=annotation, hjust=hjust), color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE )
-  # return(p)
+}
+
+#' Read and merge vcf containing all and only (Shapeit4) phased variants
+#'
+#' @param df A dataframe.
+#' @param msigdb_species species.
+#' @param msigdb_cat Category for msibdg, see msigdbr_collections()
+#' @param msigdb_subcat msigdb subcategory
+#' @param ASC Allele Specific categorization in "biallelic/monoallelic/other" column identifier in df.
+#' @param gene Gene-id column identifier in df.
+#'
+#' @import msigdbr
+#' @import tidyverse
+#' @importFrom reshape2 dcast
+#'
+#' @return A ggplot
+#' @export
+#'
+plot_msigdb<- function(df,msigdb_species="human",msigdb_cat="C5",msigdb_subcat="BP",ASC="type",gene="ensembl_gene_id"){
+  msigdb_gene_sets = msigdbr(species = msigdb_species, category = msigdb_cat,subcategory = msigdb_subcat)
+
+  df_ann<-merge(df,msigdb_gene_sets[,c("human_ensembl_gene","gs_name")],by.x=c(gene),by.y=c("human_ensembl_gene"))
+  df_ann<-unique(df_ann[,c(..gene,..ASC,"gs_name")])
+
+  gs<-merge(reshape2::dcast(df_ann,gs_name~get(ASC), fun=length, value.var = 'gs_name')%>%top_n(10,Biallelic)%>%dplyr::select(gs_name),
+            reshape2::dcast(df_ann,gs_name~get(ASC), fun=length, value.var = 'gs_name')%>%top_n(10,Monoallelic)%>%dplyr::select(gs_name),all=TRUE)
+
+  df_ann_plot<-df_ann[df_ann$gs_name%in%gs$gs_name,]
+  plot_annotation(df=df_ann_plot,ASC,gene,annotation="gs_name")
 }

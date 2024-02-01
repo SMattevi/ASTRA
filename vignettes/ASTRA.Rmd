@@ -95,31 +95,57 @@ saveRDS(df_PHASED,"ASTRAresults.rds")
 
 ### Final plotting of single gene Allele Specific Expression profile
 
+Plot of the allelic ratio (from 0 to 1, 0.5 indicating a 1 to 1 ratio of a1 and a2) for each SNPs of the selected genes.
+
 ```{r}
 p<-plot_ase(df=df_PHASED,genes_to_plot=c("MEG3"),"Final phasing result MEG3 gene")
 if(!is.null(p))
   {plot(p)}
 ```
 
+In the following is instead a radar plot of all the genes categorized as monoallelic/biallelic, annotated for the preferred category (i.e. the gene biotype).
+
 ```{r}
+#add a column with your preferred annotation to the final phased df. 
 df_ann<-merge(df_PHASED,BMsel[,c("ensembl_gene_id","gene_biotype")],by=c("ensembl_gene_id"))
+#Be sure to not have double genes.
 df_ann<-unique(df_ann[,c("ensembl_gene_id","type","gene_biotype")])
+
+#plot function:
 plot_annotation(df=df_ann,ASC="type",gene="ensembl_gene_id",annotation="gene_biotype")
-# if(!is.null(p))
-#   {plot(p)}
-# 
-# x <- scan("/home/smattevi/c5.all.v2023.1.Hs.symbols.gmt.txt", what="", sep="\n")
-# # Separate elements by one or more whitepace
-# y <- strsplit(x, "[[:space:]]+")
-# # Extract the first vector element and set it as the list element name
-# names(y) <- sapply(y, `[[`, 1)
-# #names(y) <- sapply(y, function(x) x[[1]]) # same as above
-# # Remove the first vector element from each list element
-# y <- lapply(y, `[`, -1)
-# #y <- lapply(y, function(x) x[-1]) # same as above
 ```
 
-# Load Salmon counts
+Similar to the previous, but automatic annotation using msigbd. Just select preferred category and subcategory. More info typing *msigdbr_collections()*
+
+```{r}
+plot_msigdb(df_PHASED,ASC="type",gene="ensembl_gene_id")
+
+# library(msigdbr)} 
+# library(tidyverse) 
+#library(clusterProfiler)
+# library(maditr) 
+# msigdbr_collections() 
+#msigdb_gene_sets = msigdbr(species = "human", category = "C5",subcategory = "MF") 
+#  
+# df_ann<-merge(df_PHASED,msigdb_gene_sets[,c("human_ensembl_gene","gs_name")],by.x=c("ensembl_gene_id"),by.y=c("human_ensembl_gene")) 
+# df_ann<-unique(df_ann[,c("ensembl_gene_id","type","gs_name")]) 
+#  
+# gs<-merge(dcast(df_ann,gs_name~type)%>%top_n(10,Biallelic)%>%select(gs_name), 
+#   dcast(df_ann,gs_name~type)%>%top_n(10,Monoallelic)%>%select(gs_name),all=TRUE) 
+#  
+# df_ann_plot<-df_ann[df_ann$gs_name%in%gs$gs_name,] 
+# plot_annotation(df=df_ann_plot,ASC="type",gene="ensembl_gene_id",annotation="gs_name") 
+#  
+#m_t2g<-msigdb_gene_sets%>%dplyr::select(gs_name, gene_symbol) # head(m_t2g)
+
+
+#enr<-enricher(unique(df_PHASED$hgnc_symbol[df_PHASED$type=="Monoallelic"]),TERM2GENE=m_t2g, universe=unique(df_PHASED$hgnc_symbol),pvalueCutoff = 0.2,qvalueCutoff = 0.2)  
+#head(enr)
+```
+
+# Integrate SEESAW
+
+SEESAW vignette available here: <https://mikelove.github.io/Bioc2022AllelicExpression/articles/Bioc2022AllelicExpression.html>. It permits the ASE analysis at the isoform level. Our intention is to create an isoform specific expression analysis starting merging together ASTRA and SEESAW concepts.
 
 ```{r}
 expr<-read_salmon(salmon_path=system.file("extdata", "quant.sf", package = "ASTRA"),txdb=EnsDb.Hsapiens.v86,counts=0)
