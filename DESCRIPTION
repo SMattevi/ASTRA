@@ -10,22 +10,28 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.0
 Imports: 
+    AnnotationHub,
     biomaRt,
     data.table,
     dplyr,
     EnsDb.Hsapiens.v86,
+    fishpond,
     fmsb,
     forcats,
     GenomicRanges,
     ggpattern,
     ggplot2,
+    Gviz,
     IRanges,
     msigdbr,
+    plyranges,
     R.utils,
     reshape2,
     rlang,
     scales,
+    SummarizedExperiment,
     tidyr,
+    tximeta,
     tximport
 Depends: 
     R (>= 2.10),

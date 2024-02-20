@@ -148,5 +148,7 @@ plot_msigdb(df_PHASED,ASC="type",gene="ensembl_gene_id")
 SEESAW vignette available here: <https://mikelove.github.io/Bioc2022AllelicExpression/articles/Bioc2022AllelicExpression.html>. It permits the ASE analysis at the isoform level. Our intention is to create an isoform specific expression analysis starting merging together ASTRA and SEESAW concepts.
 
 ```{r}
-expr<-read_salmon(salmon_path=system.file("extdata", "quant.sf", package = "ASTRA"),txdb=EnsDb.Hsapiens.v86,counts=0)
+#expr<-read_salmon(salmon_path=system.file("extdata", "quant.sf", package = "ASTRA"),txdb=EnsDb.Hsapiens.v86,counts=0)
+
+seesaw(names = sample, edb_id="AH113665",tss_gap=50,gene_id="ENSG00000214548",files="/mnt/projects-2024/ASTRA/ASTRA_bulk_pipeline/results/seesaw/salmon/quant.sf",cellline_id="bj")
 ```
