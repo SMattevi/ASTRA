@@ -55,7 +55,7 @@ seesaw<-function(names, edb_id="AH113665",tss_gap=50,gene_id,files, cellline_id)
   #Effectively import allelic counts obtained after g2gtools and salmon. Change a1 and a2!
   gse <- importAllelicCounts(
     coldata, a1="L", a2="R",
-    format="wide", tx2gene=txps,
+    format="wide", tx2gene=txps, importer=read.delim
   )
 
   # filtering out lowly expressed features (assay(gse) = expression for each allele, rowsums = number of allele in which it has to be verified):
