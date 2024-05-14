@@ -2,7 +2,7 @@
 % Please edit documentation in R/biomart_df.R
 \name{biomart_df}
 \alias{biomart_df}
-\title{Read and merge vcf containing all and only (Shapeit4) phased variants}
+\title{Create annotation df from biomart}
 \usage{
 biomart_df(dataset_choice = "hsapiens_gene_ensembl", window = 2.5)
 }
@@ -15,8 +15,5 @@ biomart_df(dataset_choice = "hsapiens_gene_ensembl", window = 2.5)
 A dataframe.
 }
 \description{
-Read and merge vcf containing all and only (Shapeit4) phased variants
-}
-\examples{
-biomart_df("hsapiens_gene_ensembl")
+Create annotation df from biomart
 }

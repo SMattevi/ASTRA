@@ -22,7 +22,7 @@ library(ASTRA)
 Using Biomart to upload gene information for the following SNPs annotation
 
 ```{r}
-BM<-biomart_df()
+BM<-annotationhub_df()
 
 ```
 

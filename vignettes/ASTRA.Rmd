@@ -40,7 +40,7 @@ sample="BJ"
 BioMart - Ensembl is used to extract genes information, the function *biomart_df()* set up the biomart dataframe as needed by the following function. Change the mart dataset if needed and the gene expanding window.
 
 ```{r}
-BM <- biomart_df()
+BM <- annotationhub_df()
 BMsel<-BM[BM$chromosome_name==chrom,]
 
 head(BMsel)
