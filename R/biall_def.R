@@ -24,7 +24,7 @@ biallmonoall<-function(df,refFracValue=c(0.15,0.85),biallObs=1,monoallObs=1,bt=2
   bial<-base::merge(genesymbol,bial,by=c("ensembl_gene_id"),all.y=T)
 
   #consider as bial only genes with at least 1 evidences
-  data<-bial[bial$variantID>=biallObs]
+  data<-bial[bial$variantID>=biallObs,]
 
   base::colnames(data)[base::colnames(data) == 'variantID'] <- 'variantID.biall'
 
@@ -61,6 +61,7 @@ biallmonoall<-function(df,refFracValue=c(0.15,0.85),biallObs=1,monoallObs=1,bt=2
     for(i in 1:nrow(data_merge)){
       if(data_merge$variantID.biall[i]>=data_merge$variantID.mono[i]|data_merge$variantID.biall[i]>=bt){
         data1<-data1[!(data1$ensembl_gene_id==data_merge$ensembl_gene_id[i]),]
+        #to remove non concordant snps uncomment following line
         #df<-df[!(df$ensembl_gene_id==data_merge$ensembl_gene_id[i]&(df$refFrac<=refFracValue[1]|df$refFrac>=refFracValue[2]))]
       }else{
         data<-data[!(data$ensembl_gene_id==data_merge$ensembl_gene_id[i]),]
